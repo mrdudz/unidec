@@ -9,12 +9,14 @@
 #define MAXDATALINES     8
 
 #define WINDOWWIDTH     1400
-#define WINDOWHEIGHT    800
+#define WINDOWHEIGHT    820
 
 #define TEXTBOXHEIGHT   700
 
-#define ADDRCOMBOYPOS   700
-#define DATACOMBOYPOS   750
+#define ADDRLABELYPOS   700
+#define ADDRCOMBOYPOS   720
+#define DATALABELYPOS   760
+#define DATACOMBOYPOS   780
 
 GtkWidget *combobox_addrline[MAXADDRLINES];
 GtkWidget *combobox_dataline[MAXADDRLINES];
@@ -23,7 +25,6 @@ gulong combobox_addrline_signal_id[MAXADDRLINES];
 
 GtkWidget *scrolled;
 GtkWidget *textbox;
-//GtkTextBuffer *textbuffer;
 
 unsigned char rawbuffer[MAXFILELENGTH];
 unsigned char decodedbuffer[MAXFILELENGTH];
@@ -41,13 +42,13 @@ unsigned char hexdumpbuffer[MAXFILELENGTH*5];
  *
  * Use this function if you need a CSS provider you'll apply multiple times,
  * if you need to apply CSS to a widget only once, there's a wrapper function
- * #vice_gtk3_css_add().
+ * #gtk3_css_add().
  *
  * \param[in]   css CSS string
  *
  * \return  new provider or NULL on error
  */
-GtkCssProvider *vice_gtk3_css_provider_new(const char *css)
+GtkCssProvider *gtk3_css_provider_new(const char *css)
 {
     GtkCssProvider *provider;
     GError *err = NULL;
@@ -57,7 +58,7 @@ GtkCssProvider *vice_gtk3_css_provider_new(const char *css)
     /* attempt to load CSS from string */
     gtk_css_provider_load_from_data(provider, css, -1, &err);
     if (err != NULL) {
-//        log_error(LOG_ERR, "CSS error: %s", err->message);
+        fprintf(stderr, "CSS error: %s\n", err->message);
         g_error_free(err);
         return NULL;
     }
@@ -72,7 +73,7 @@ GtkCssProvider *vice_gtk3_css_provider_new(const char *css)
  *
  * \return  bool
  */
-gboolean vice_gtk3_css_provider_add(GtkWidget *widget,
+gboolean gtk3_css_provider_add(GtkWidget *widget,
                                     GtkCssProvider *provider)
 {
     GtkStyleContext *context;
@@ -80,7 +81,7 @@ gboolean vice_gtk3_css_provider_add(GtkWidget *widget,
     /* try to get style context */
     context = gtk_widget_get_style_context(widget);
     if (context == NULL) {
-//        log_error(LOG_ERR, "Couldn't get style context of widget");
+        fprintf(stderr, "CSS error\n");
         /* don't free the context, it's owned by the widget */
         return FALSE;
     }
@@ -100,7 +101,7 @@ gboolean vice_gtk3_css_provider_add(GtkWidget *widget,
  *
  * \return  gboolean
  */
-gboolean vice_gtk3_css_provider_remove(GtkWidget *widget,
+gboolean gtk3_css_provider_remove(GtkWidget *widget,
                                        GtkCssProvider *provider)
 {
     GtkStyleContext *context;
@@ -108,7 +109,7 @@ gboolean vice_gtk3_css_provider_remove(GtkWidget *widget,
     /* try to get style context */
     context = gtk_widget_get_style_context(widget);
     if (context == NULL) {
-//        log_error(LOG_ERR, "Couldn't get style context of widget");
+        fprintf(stderr, "Couldn't get style context of widget\n");
         /* don't free the context, it's owned by the widget */
         return FALSE;
     }
@@ -122,8 +123,8 @@ gboolean vice_gtk3_css_provider_remove(GtkWidget *widget,
 /** \brief  Add CSS string \a css to \a widget
  *
  * Only use this when adding CSS to a single widget, if you need to add the
- * same CSS to multiple widgets use #vice_gtk3_css_provider_new() to create
- * a CSS provider once and #vice_gtk3_css_provider_add() to add it multiple
+ * same CSS to multiple widgets use #gtk3_css_provider_new() to create
+ * a CSS provider once and #gtk3_css_provider_add() to add it multiple
  * times.
  *
  * \param[in,out]   widget  widget to add CSS to
@@ -131,13 +132,13 @@ gboolean vice_gtk3_css_provider_remove(GtkWidget *widget,
  *
  * \return  bool
  */
-gboolean vice_gtk3_css_add(GtkWidget *widget, const char *css)
+gboolean gtk3_css_add(GtkWidget *widget, const char *css)
 {
     GtkCssProvider *provider;
 
-    provider = vice_gtk3_css_provider_new(css);
+    provider = gtk3_css_provider_new(css);
     if (provider != NULL) {
-        return vice_gtk3_css_provider_add(widget, provider);
+        return gtk3_css_provider_add(widget, provider);
     }
     return FALSE;
 }
@@ -402,7 +403,7 @@ int main(int argc, char *argv[])
     {
         textbox = gtk_label_new(NULL);
         gtk_label_set_single_line_mode(GTK_LABEL(textbox), FALSE);        
-        vice_gtk3_css_add(textbox, PREVIEW_CSS);
+        gtk3_css_add(textbox, PREVIEW_CSS);
 
         scrolled = gtk_scrolled_window_new(NULL, NULL);
         gtk_widget_set_size_request(scrolled, WINDOWWIDTH, TEXTBOXHEIGHT);
@@ -416,9 +417,18 @@ int main(int argc, char *argv[])
     // create combo boxes for the address lines
     {
         int i = 0, n = 0;
+        GtkWidget *label;
+        label = gtk_label_new("Bus:");
+        gtk_fixed_put (GTK_FIXED (k), label, 10, ADDRLABELYPOS);
+        label = gtk_label_new("Chip:");
+        gtk_fixed_put (GTK_FIXED (k), label, 10, ADDRCOMBOYPOS);
 
         for (i = 0; i < MAXADDRLINES; i++) {
             unsigned char combotext[5];
+            sprintf(combotext, "A%d", i);
+            label = gtk_label_new(combotext);
+            gtk_fixed_put (GTK_FIXED (k), label, 15 + (MAXADDRLINES - i) * 60, ADDRLABELYPOS);
+
             combobox_addrline[i] = gtk_combo_box_text_new();
             gtk_fixed_put (GTK_FIXED (k), combobox_addrline[i], (MAXADDRLINES - i) * 60, ADDRCOMBOYPOS);
             gtk_widget_set_size_request(combobox_addrline[i], 10, 10);
@@ -440,9 +450,18 @@ int main(int argc, char *argv[])
     // create combo boxes for the data lines
     {
         int i = 0, n = 0;
+        GtkWidget *label;
+        label = gtk_label_new("Bus:");
+        gtk_fixed_put (GTK_FIXED (k), label, 10, DATALABELYPOS);
+        label = gtk_label_new("Chip:");
+        gtk_fixed_put (GTK_FIXED (k), label, 10, DATACOMBOYPOS);
 
         for (i = 0; i < MAXDATALINES; i++) {
             unsigned char combotext[5];
+            sprintf(combotext, "D%d", i);
+            label = gtk_label_new(combotext);
+            gtk_fixed_put (GTK_FIXED (k), label, 15 + (MAXDATALINES - i) * 60, DATALABELYPOS);
+
             combobox_dataline[i] = gtk_combo_box_text_new();
             gtk_fixed_put (GTK_FIXED (k), combobox_dataline[i], (MAXDATALINES - i) * 60, DATACOMBOYPOS);
             gtk_widget_set_size_request(combobox_dataline[i], 10, 10);

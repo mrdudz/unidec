@@ -37,12 +37,14 @@ testu: unidec
 			-o warpspeed128-decoded.bin -i ./testroms/C128WarpSpeedV2-1987.raw
 	diff -s warpspeed128-decoded.bin ./testroms/C128WarpSpeedV2-1987.bin
 
-	./unidec --verbose -d 0 1 -o whizrom-decoded.bin -i ./testroms/whizrom.bin
+	./unidec --verbose -a 0 8 -a 1 9 -a 2 13 -a 3 11 -a 4 10 -a 5 7 -a 7 5 -a 8 4 -a 9 0 -a 10 1 -a 11 2 -a 12 3 -a 13 12 \
+		-o whizrom-decoded.bin -i ./testroms/whizrom.bin
 
 	make cleantest
 
 testgtk: gtkunidec
-	./gtkunidec -o whizrom-decoded.bin -i ./testroms/whizrom.bin
+	./gtkunidec -a 0 8 -a 1 9 -a 2 13 -a 3 11 -a 4 10 -a 5 7 -a 7 5 -a 8 4 -a 9 0 -a 10 1 -a 11 2 -a 12 3 -a 13 12 \
+		-o whizrom-decoded.bin -i ./testroms/whizrom.bin
 
 	make cleantest
 
