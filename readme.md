@@ -5,8 +5,26 @@ TODO:
 - fix this documentation
 - add presets for known cartridges
 - add more error checking / user input validation
+- perhaps add some sort of automatic scanning for known patterns
 
+-------------------------------------------------------------------------------
 
+![gtkunidec](/images/gtkunidec.png)
+
+unidec is a simple command line tool to decode ROM dumps from ROMs that have
+their address- and/or data lines scrambled on the hardware.
+
+gtkunidec is an interactive version of the same program, which hopefully is
+helpful with working out how the lines are connected (when the hardware is not
+available for doing measurements).
+
+-------------------------------------------------------------------------------
+
+building:
+
+just type "make". gtkunidec will require GTK3 libraries installed.
+
+-------------------------------------------------------------------------------
 
 StarDOS:
 --------
@@ -91,7 +109,6 @@ printing modul:
 
 
 
-
 Warpspeed 128
 -------------
 
@@ -121,3 +138,31 @@ J/A13               A12 --------
 15/D6               D6 --------- 
 14/D7               D7 --------- 
 
+Whizzard
+--------
+
+Cartridge port     Chip pin --- 
+Y/A0               8 n/a
+X/A1               9 n/a
+W/A2               13 n/a
+V/A3               11 n/a
+U/A4                A10 guessed
+T/A5                A7 guessed
+S/A6                A6
+R/A7                A5
+P/A8                A4
+N/A9                A0
+M/A10               A1
+L/A11               A2
+K/A12               A3
+J/A13               A12
+
+
+21/D0              
+20/D1              
+19/D2              
+18/D3              
+17/D4              
+16/D5              
+15/D6              
+14/D7              
