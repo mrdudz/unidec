@@ -5,7 +5,8 @@
 
 #define MAXFILELENGTH   (0x10000 * 1024) // 1Mb
 
-#define MAXADDRLINES    16
+//#define MAXADDRLINES    16      /* 64k */
+#define MAXADDRLINES    20      /* 1Mb */
 #define MAXDATALINES     8
 
 #define WINDOWWIDTH     1300
@@ -19,14 +20,21 @@
 #define BOTTOMHEIGHT    ((WINDOWHEIGHT)-(ADDRLABELYPOS))
 #define TEXTBOXHEIGHT   ((WINDOWHEIGHT)-(BOTTOMHEIGHT))
 
+#define FONTHEIGHT      12
+#define FONTLINEHEIGHT  16
 
 GtkWidget *combobox_addrline[MAXADDRLINES];
 GtkWidget *combobox_dataline[MAXADDRLINES];
 gulong combobox_dataline_signal_id[MAXDATALINES];
 gulong combobox_addrline_signal_id[MAXADDRLINES];
 
+gulong textscale_signal_id;
+
 GtkWidget *scrolled;
 GtkWidget *textbox;
+GtkWidget *textscale;
+
+unsigned long file_offset = 0;
 
 unsigned char rawbuffer[MAXFILELENGTH];
 unsigned char decodedbuffer[MAXFILELENGTH];
@@ -36,6 +44,7 @@ unsigned char hexdumpbuffer[MAXFILELENGTH*5];
 #define PREVIEW_CSS \
     "label {\n" \
     "    font-family: \"Monospace\";\n" \
+    "    font-size: 12px;\n" \
     "    background-color: black;\n" \
     "    color: limegreen;\n" \
     "}\n"
@@ -159,7 +168,7 @@ static void destroy(GtkWidget *widget, gpointer data)
     gtk_main_quit();
 }
 
-static char *scrtab =
+static const char *scrtab =
     "@abcdefghijklmno" // 00
     "pqrstuvwxyz[.]^_" // 10
     " !\"#$%&'()*+,-./" // 20
@@ -177,7 +186,7 @@ static char *scrtab =
     "................"
     "................";
 
-static char *pettab =
+static const char *pettab =
     "................"  // 00
     "................"  // 10
     " !\"#$%&'()*+,-./" // 20
@@ -199,42 +208,54 @@ static void update_hexdump(void)
 {
     int i, n = 0;
     char *txt = hexdumpbuffer;
-    for (i = 0; i < filelength; i += 0x20) {
-        txt += sprintf(txt, "%04x: %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x "
-                            "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x "
-                            " %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c"
-                            "%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c"
-                            " %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c"
-                            "%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n"
-                       ,i,
-                       decodedbuffer[i], decodedbuffer[i+1], decodedbuffer[i+2], decodedbuffer[i+3],
-                       decodedbuffer[i+4], decodedbuffer[i+5], decodedbuffer[i+6], decodedbuffer[i+7],
-                       decodedbuffer[i+8], decodedbuffer[i+9], decodedbuffer[i+10], decodedbuffer[i+11],
-                       decodedbuffer[i+12], decodedbuffer[i+13], decodedbuffer[i+14], decodedbuffer[i+15],
-                       decodedbuffer[i+16], decodedbuffer[i+17], decodedbuffer[i+18], decodedbuffer[i+19],
-                       decodedbuffer[i+20], decodedbuffer[i+21], decodedbuffer[i+22], decodedbuffer[i+23],
-                       decodedbuffer[i+24], decodedbuffer[i+25], decodedbuffer[i+26], decodedbuffer[i+27],
-                       decodedbuffer[i+28], decodedbuffer[i+29], decodedbuffer[i+30], decodedbuffer[i+31],
-                       pettab[decodedbuffer[i]], pettab[decodedbuffer[i+1]], pettab[decodedbuffer[i+2]], pettab[decodedbuffer[i+3]],
-                       pettab[decodedbuffer[i+4]], pettab[decodedbuffer[i+5]], pettab[decodedbuffer[i+6]], pettab[decodedbuffer[i+7]],
-                       pettab[decodedbuffer[i+8]], pettab[decodedbuffer[i+9]], pettab[decodedbuffer[i+10]], pettab[decodedbuffer[i+11]],
-                       pettab[decodedbuffer[i+12]], pettab[decodedbuffer[i+13]], pettab[decodedbuffer[i+14]], pettab[decodedbuffer[i+15]],
-                       pettab[decodedbuffer[i+16]], pettab[decodedbuffer[i+17]], pettab[decodedbuffer[i+18]], pettab[decodedbuffer[i+19]],
-                       pettab[decodedbuffer[i+20]], pettab[decodedbuffer[i+21]], pettab[decodedbuffer[i+22]], pettab[decodedbuffer[i+23]],
-                       pettab[decodedbuffer[i+24]], pettab[decodedbuffer[i+25]], pettab[decodedbuffer[i+26]], pettab[decodedbuffer[i+27]],
-                       pettab[decodedbuffer[i+28]], pettab[decodedbuffer[i+29]], pettab[decodedbuffer[i+30]], pettab[decodedbuffer[i+31]],
-                       scrtab[decodedbuffer[i]], scrtab[decodedbuffer[i+1]], scrtab[decodedbuffer[i+2]], scrtab[decodedbuffer[i+3]],
-                       scrtab[decodedbuffer[i+4]], scrtab[decodedbuffer[i+5]], scrtab[decodedbuffer[i+6]], scrtab[decodedbuffer[i+7]],
-                       scrtab[decodedbuffer[i+8]], scrtab[decodedbuffer[i+9]], scrtab[decodedbuffer[i+10]], scrtab[decodedbuffer[i+11]],
-                       scrtab[decodedbuffer[i+12]], scrtab[decodedbuffer[i+13]], scrtab[decodedbuffer[i+14]], scrtab[decodedbuffer[i+15]],
-                       scrtab[decodedbuffer[i+16]], scrtab[decodedbuffer[i+17]], scrtab[decodedbuffer[i+18]], scrtab[decodedbuffer[i+19]],
-                       scrtab[decodedbuffer[i+20]], scrtab[decodedbuffer[i+21]], scrtab[decodedbuffer[i+22]], scrtab[decodedbuffer[i+23]],
-                       scrtab[decodedbuffer[i+24]], scrtab[decodedbuffer[i+25]], scrtab[decodedbuffer[i+26]], scrtab[decodedbuffer[i+27]],
-                       scrtab[decodedbuffer[i+28]], scrtab[decodedbuffer[i+29]], scrtab[decodedbuffer[i+30]], scrtab[decodedbuffer[i+31]]
-               );
+
+    if (verbose > 2) { printf("update_hexdump start\n"); }
+
+    for (n = 0; n < (0x20*(TEXTBOXHEIGHT / FONTLINEHEIGHT)); n += 0x20) {
+        i = n + file_offset;
+        if (i >= filelength) {
+            txt += sprintf(txt, "%08x:\n", i);
+        } else {
+            txt += sprintf(txt, "%08x: %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x "
+                                "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x "
+                                " %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c"
+                                "%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c"
+                                " %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c"
+                                "%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n"
+                        ,i,
+                        decodedbuffer[i], decodedbuffer[i+1], decodedbuffer[i+2], decodedbuffer[i+3],
+                        decodedbuffer[i+4], decodedbuffer[i+5], decodedbuffer[i+6], decodedbuffer[i+7],
+                        decodedbuffer[i+8], decodedbuffer[i+9], decodedbuffer[i+10], decodedbuffer[i+11],
+                        decodedbuffer[i+12], decodedbuffer[i+13], decodedbuffer[i+14], decodedbuffer[i+15],
+                        decodedbuffer[i+16], decodedbuffer[i+17], decodedbuffer[i+18], decodedbuffer[i+19],
+                        decodedbuffer[i+20], decodedbuffer[i+21], decodedbuffer[i+22], decodedbuffer[i+23],
+                        decodedbuffer[i+24], decodedbuffer[i+25], decodedbuffer[i+26], decodedbuffer[i+27],
+                        decodedbuffer[i+28], decodedbuffer[i+29], decodedbuffer[i+30], decodedbuffer[i+31],
+                        pettab[decodedbuffer[i]], pettab[decodedbuffer[i+1]], pettab[decodedbuffer[i+2]], pettab[decodedbuffer[i+3]],
+                        pettab[decodedbuffer[i+4]], pettab[decodedbuffer[i+5]], pettab[decodedbuffer[i+6]], pettab[decodedbuffer[i+7]],
+                        pettab[decodedbuffer[i+8]], pettab[decodedbuffer[i+9]], pettab[decodedbuffer[i+10]], pettab[decodedbuffer[i+11]],
+                        pettab[decodedbuffer[i+12]], pettab[decodedbuffer[i+13]], pettab[decodedbuffer[i+14]], pettab[decodedbuffer[i+15]],
+                        pettab[decodedbuffer[i+16]], pettab[decodedbuffer[i+17]], pettab[decodedbuffer[i+18]], pettab[decodedbuffer[i+19]],
+                        pettab[decodedbuffer[i+20]], pettab[decodedbuffer[i+21]], pettab[decodedbuffer[i+22]], pettab[decodedbuffer[i+23]],
+                        pettab[decodedbuffer[i+24]], pettab[decodedbuffer[i+25]], pettab[decodedbuffer[i+26]], pettab[decodedbuffer[i+27]],
+                        pettab[decodedbuffer[i+28]], pettab[decodedbuffer[i+29]], pettab[decodedbuffer[i+30]], pettab[decodedbuffer[i+31]],
+                        scrtab[decodedbuffer[i]], scrtab[decodedbuffer[i+1]], scrtab[decodedbuffer[i+2]], scrtab[decodedbuffer[i+3]],
+                        scrtab[decodedbuffer[i+4]], scrtab[decodedbuffer[i+5]], scrtab[decodedbuffer[i+6]], scrtab[decodedbuffer[i+7]],
+                        scrtab[decodedbuffer[i+8]], scrtab[decodedbuffer[i+9]], scrtab[decodedbuffer[i+10]], scrtab[decodedbuffer[i+11]],
+                        scrtab[decodedbuffer[i+12]], scrtab[decodedbuffer[i+13]], scrtab[decodedbuffer[i+14]], scrtab[decodedbuffer[i+15]],
+                        scrtab[decodedbuffer[i+16]], scrtab[decodedbuffer[i+17]], scrtab[decodedbuffer[i+18]], scrtab[decodedbuffer[i+19]],
+                        scrtab[decodedbuffer[i+20]], scrtab[decodedbuffer[i+21]], scrtab[decodedbuffer[i+22]], scrtab[decodedbuffer[i+23]],
+                        scrtab[decodedbuffer[i+24]], scrtab[decodedbuffer[i+25]], scrtab[decodedbuffer[i+26]], scrtab[decodedbuffer[i+27]],
+                        scrtab[decodedbuffer[i+28]], scrtab[decodedbuffer[i+29]], scrtab[decodedbuffer[i+30]], scrtab[decodedbuffer[i+31]]
+                );
+        }
     }
+    if (verbose > 2) { printf("update_hexdump set label\n"); }
 //    gtk_text_buffer_set_text (textbuffer, hexdumpbuffer, -1);
     gtk_label_set_text(GTK_LABEL(textbox), hexdumpbuffer);
+    if (verbose > 2) { printf("gtk_widget_show_all\n"); }
+    gtk_widget_show_all(GTK_WIDGET(textbox));
+    if (verbose > 2) { printf("update_hexdump stop\n"); }
 }
 
 static void update_addr_comboboxes(void)
@@ -333,6 +354,15 @@ static void dataline_changed(GtkWidget *widget, gpointer data)
     update_hexdump();
 }
 
+static void textscale_changed(GtkWidget *widget, gpointer data)
+{
+    int line = (int)gtk_range_get_value(GTK_RANGE(widget));
+    int addr = line * 0x20;
+    if (verbose > 2) { printf("textscale_changed: %08x\n", addr); }
+    file_offset = addr;
+    update_hexdump();
+}
+
 static void usage(void)
 {
     printf("unidec - swap address- and databits in a binary dump\n"
@@ -401,21 +431,29 @@ int main(int argc, char *argv[])
     k= gtk_fixed_new();
     gtk_container_add(GTK_CONTAINER(window), k);
 
+    if (verbose > 2) { printf("create the textbox\n"); }
     // create the textbox
     {
         textbox = gtk_label_new(NULL);
         gtk_label_set_single_line_mode(GTK_LABEL(textbox), FALSE);        
         gtk3_css_add(textbox, PREVIEW_CSS);
 
-        scrolled = gtk_scrolled_window_new(NULL, NULL);
-        gtk_widget_set_size_request(scrolled, WINDOWWIDTH, TEXTBOXHEIGHT);
-        gtk_container_add(GTK_CONTAINER(scrolled), textbox);
+        gtk_widget_set_size_request(textbox, WINDOWWIDTH - 10, TEXTBOXHEIGHT);
+        gtk_fixed_put (GTK_FIXED (k), textbox, 0, 0);
 
-        gtk_fixed_put (GTK_FIXED (k), scrolled, 0, 0);
-
+        // TODO: when we reload the file, we must update the range of the scale
+        textscale = gtk_scale_new_with_range (
+                        GTK_ORIENTATION_VERTICAL,
+                        0,
+                        (filelength / 0x20) - (TEXTBOXHEIGHT / FONTLINEHEIGHT),
+                        1);
+        gtk_scale_set_draw_value(GTK_SCALE(textscale), FALSE);
+        gtk_widget_set_size_request(textscale, 10, TEXTBOXHEIGHT);
+        gtk_fixed_put (GTK_FIXED (k), textscale, WINDOWWIDTH - 10, 0);
         update_hexdump();
+        textscale_signal_id = g_signal_connect(textscale, "value-changed", G_CALLBACK(textscale_changed), NULL);
     }
-
+    if (verbose > 2) { printf("create combo boxes for the address lines\n"); }
     // create combo boxes for the address lines
     {
         int i = 0, n = 0;
@@ -449,6 +487,7 @@ int main(int argc, char *argv[])
         }
     }
 
+    if (verbose > 2) { printf("create combo boxes for the data lines\n"); }
     // create combo boxes for the data lines
     {
         int i = 0, n = 0;
@@ -477,9 +516,12 @@ int main(int argc, char *argv[])
         }
     }
 
+    if (verbose > 2) { printf("gtk_widget_set_size_request\n"); }
     gtk_widget_set_size_request(GTK_WIDGET(window),WINDOWWIDTH, WINDOWHEIGHT);
+    if (verbose > 2) { printf("gtk_widget_show_all\n"); }
     gtk_widget_show_all(GTK_WIDGET(window));
 
+    if (verbose > 2) { printf("gtk_main\n"); }
     gtk_main();
     return 0;
 }
