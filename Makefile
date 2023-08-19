@@ -10,7 +10,7 @@ unidec: universal-decoder.c decodefunc.c filefunc.c
 gtkunidec: gtk-decoder.c decodefunc.c filefunc.c
 	$(CC) gtk-decoder.c `pkg-config --libs --cflags gtk+-3.0` -o gtkunidec
 
-clean:
+clean: cleantest
 	$(RM) unidec
 	$(RM) gtkunidec
 
