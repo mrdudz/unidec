@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAXFILELENGTH   0x10000
+#define MAXFILELENGTH   (0x10000 * 1024) // 1Mb
 
 char *infilename = NULL, *outfilename = NULL;
 unsigned char inbuf[MAXFILELENGTH];

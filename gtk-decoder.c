@@ -3,20 +3,22 @@
 #include <stdlib.h>
 #include <strings.h>
 
-#define MAXFILELENGTH     0x10000
+#define MAXFILELENGTH   (0x10000 * 1024) // 1Mb
 
 #define MAXADDRLINES    16
 #define MAXDATALINES     8
 
-#define WINDOWWIDTH     1400
-#define WINDOWHEIGHT    820
+#define WINDOWWIDTH     1300
+#define WINDOWHEIGHT    750
 
-#define TEXTBOXHEIGHT   700
+#define ADDRLABELYPOS   600
+#define ADDRCOMBOYPOS   620
+#define DATALABELYPOS   660
+#define DATACOMBOYPOS   680
 
-#define ADDRLABELYPOS   700
-#define ADDRCOMBOYPOS   720
-#define DATALABELYPOS   760
-#define DATACOMBOYPOS   780
+#define BOTTOMHEIGHT    ((WINDOWHEIGHT)-(ADDRLABELYPOS))
+#define TEXTBOXHEIGHT   ((WINDOWHEIGHT)-(BOTTOMHEIGHT))
+
 
 GtkWidget *combobox_addrline[MAXADDRLINES];
 GtkWidget *combobox_dataline[MAXADDRLINES];

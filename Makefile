@@ -48,6 +48,13 @@ testgtk: gtkunidec
 
 	make cleantest
 
+testhugo: unidec
+	./unidec --verbose -a 0 10 -a 1 11 -a 2 9 -a 3 8 -a 4 0 -a 5 1 -a 6 2 -a 7 3 -a 8 4 -a 9 5 -a 10 6 -a 11 7 -a 12 12 \
+			-a 13 13 -a 14 14 -a 15 15 -a 16 16 \
+			-d 0 3 -d 1 2 -d 2 1 -d 3 0 -d 4 4 -d 5 5 -d 6 6 -d 7 7 \
+		-o decoded.bin -i ROM_Original.bin
+	
+
 cleantest:
 	$(RM) capture-decoded.bin
 	$(RM) stardos-decoded.bin
