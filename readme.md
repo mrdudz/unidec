@@ -198,6 +198,50 @@ Contains a 27128 EPROM (16k)
     14/D7               D6
 
 
+Silverrock 128
+--------------
+
+    Cartridge port     Chip pin
+    Y/A0               A10
+    X/A1               A11
+    W/A2               A9
+    V/A3               A8
+    U/A4               A0
+    T/A5               A1
+    S/A6               A2
+    R/A7               A3
+    P/A8               A4
+    N/A9               A5
+    M/A10              A6
+    L/A11              A7
+    K/A12              A12
+
+    21/D0              D3
+    20/D1              D2
+    19/D2              D1
+    18/D3              D0
+    17/D4              D4
+    16/D5              D5
+    15/D6              D6
+    14/D7              D7
+
+for the bank switching, a register in the IO1 area is used. the 4 topmost data
+bits are used in this order:
+
+      D4               A14
+      D5               A15
+      D6               A16
+      D7               A13
+
+on the v2 hardware, apparently the lower 4 bits of the address that is written
+to is used instead:
+
+      A0               A13
+      A1               A14
+      A2               A15
+      A3               A16
+
+
 Warpspeed 128
 -------------
 
