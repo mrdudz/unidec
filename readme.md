@@ -96,22 +96,22 @@ C64 Expansion port (looking "into" the Computer)
     --O--O--O--O--O--O--O--O--O--O--O--O--O--O--
       1  2  3  4  5  6  7  8  9  10 11 12 13 14
 
-      2764 (8Kib) EPROM:          23128 (16Kib) mask ROM:
+      2764 (8Kib) EPROM:          23128 (16Kib) mask ROM:            27256 (32Kib) EPROM:
 
-      1 Vpp     15  Vdd           1 (nc)    15  Vcc
-      2 A12     16  PGM           2 A12     16  OE1/!OE1/nc
-      3 A7      17  (nc)          3 A7      17  A13
-      4 A6      18  A8            4 A6      18  A8
-      5 A5      19  A9            5 A5      19  A9
-      6 A4      20  A11           6 A4      20  A11
-      7 A3      21  OE            7 A3      21  OE/!OE/nc
-      8 A2      22  A10           8 A2      22  A10
-      9 A1      23  CS            9 A1      23  CE/!CE/OE2/!OE2
-     10 A0      24  D7           10 A0      24  D7
-     11 D0      25  D6           11 D0      25  D6
-     12 D1      26  D5           12 D1      26  D5
-     13 D2      27  D4           13 D2      27  D4
-     14 Vss     28  D3           14 Vss     28  D3
+      1 Vpp     28  Vcc           1 (nc)    28  Vcc                  1 Vpp     28  Vcc
+      2 A12     27  PGM           2 A12     27  OE1/!OE1/nc          2 A12     27  A14
+      3 A7      26  (nc)          3 A7      26  A13                  3 A7      26  A13
+      4 A6      25  A8            4 A6      25  A8                   4 A6      25  A8
+      5 A5      24  A9            5 A5      24  A9                   5 A5      24  A9
+      6 A4      23  A11           6 A4      23  A11                  6 A4      23  A11
+      7 A3      22  OE/!G         7 A3      22  OE/!OE/nc            7 A3      22  !G
+      8 A2      21  A10           8 A2      21  A10                  8 A2      21  A10
+      9 A1      20  CS/!E         9 A1      20  CE/!CE/OE2/!OE2      9 A1      20  !E
+     10 A0      19  D7           10 A0      19  D7                  10 A0      19  D7
+     11 D0      18  D6           11 D0      18  D6                  11 D0      18  D6
+     12 D1      17  D5           12 D1      17  D5                  12 D1      17  D5
+     13 D2      16  D4           13 D2      16  D4                  13 D2      16  D4
+     14 GND     15  D3           14 GND     15  D3                  14 GND     15  D3
 
 -------------------------------------------------------------------------------
 
