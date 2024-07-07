@@ -306,3 +306,10 @@ Oceanic OC-118N Floppy Drive, Westfalia Technica (QC-118N clone), Ross-Drive
 ----------------------------------------------------------------------------
 
 All of these floppy drives appear to have D3 and D4 swapped in the ROM data.
+
+
+Data Becker "Floppy Express"
+----------------------------
+
+The drive ROM has D3 and D4 swapped.
+
