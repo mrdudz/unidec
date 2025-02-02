@@ -167,8 +167,8 @@ s'more/kingsoft business basic:
 
 ???
 
-printing modul:
----------------
+Profi-DOS (REX Datentechnik):
+-----------------------------
 
 Contains a 27128 EPROM (16k)
 
